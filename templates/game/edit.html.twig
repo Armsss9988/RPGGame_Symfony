@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Game{% endblock %}
+
+{% block body %}
+<body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
+    {{ include('game/_form.html.twig', {'button_label': 'Edit Game'}) }}
+
+    {{ include('game/_delete_form.html.twig') }}
+</body>
+{% endblock %}

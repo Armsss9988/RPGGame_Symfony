@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Game{% endblock %}
+
+{% block body %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <a class="btn btn-success" role="button" href="{{ path('app_game_new') }}">Create new</a>
+
+    {% endif %}
+    <body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
+        <form class=" row pt-5 align-items-center mx-auto"  >
+            Category:
+            <select name="category" class="col-3 me-auto" >
+                <option {{ selectedCat==null ? 'selected'}}>All</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {{ (selectedCat==category.id) ? 'selected' }}> {{ category.Name }} </option>
+                {% endfor %}
+            </select>
+            Ram: <input class="col-3 me-auto" type="number" name="ram">
+            Disk Space: <input class="col-3 me-auto" type="number" name="diskspace">
+            <input type="submit" value="Filter" class="btn btn-dark">
+        </form>
+        <div class="row">
+            <div class="col-8"><h4>{{ (category == null)? 'Game' : category.Name }}</h4></div>
+            <div class="col-2 text-end"><p>Sort: </p></div>
+            <div class="col-2">
+                <a href="{{ path(app.request.attributes.get('_route'),
+                    app.request.query.all|merge({'sort': 'Name', 'order': 'desc'})) }}"
+                   class="btn btn-primary btn-sm">Z - A</a>
+                <a href="{{ path(app.request.attributes.get('_route'),
+                    app.request.query.all|merge({'sort': 'Name', 'order': 'asc'})) }}"
+                   class="btn btn-primary btn-sm">A - Z</a>
+            </div>
+        </div>
+        {% if category != null and category.Description != null %}
+        <div class="">
+            Description:  <h6 class="d-flex justify-content-center"> {{ category.Description }} </h6>
+        </div>
+        {% endif %}
+
+    <div class="row row-cols-1 row-cols-md-4  g-4">
+        {% for game in games %}
+            {% if category in game.Category or category == null %}
+
+            <div class="col">
+                <div class="card border h-100 bg-black" style="">
+                    <img class="h-75 border" src="{{ asset('/image/game/' ~  game.ImgURL) }}">
+                    <div class="card-img-top ">
+                    <div class="card-body w-100 border">
+                        <p class="card-title h5 text-truncate text-white ">{{ game.Name }}</p>
+                        <ul class="list-group list-group-horizontal overflow-hidden fs-6">
+                            <a href="{{ path('app_game_index') }}"style="text-decoration: none;"> <li class="list-group-item text-white bg-black px-1"> Game </li></a>
+                        {% for category in game.Category %}
+                            <a href="{{ path('app_game_index',{'category': category.id}) }}" style="text-decoration: none;"><li class="list-group-item px-1 text-truncate text-white bg-black"> {{ category.Name }}</li> </a>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="card-footer ">
+                        <a href="{{ path('app_game_show', {'id': game.id}) }}"
+                           class="btn btn-primary align-text-bottom ">Show</a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        {% else %}
+
+                <p colspan="6">no game found</p>
+
+        {% endfor %}
+    </div>
+        <div class="row mt-2">
+            <div style="display:flex;text-align:center;justify-content:center">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% for i in range(1, numOfPages) %}
+                            {% set style = app.request.get('pageId')==i ? "active" : "" %}
+                            <li class="page-item {{ style }}">
+                                <a class="page-link"
+                                   href={{ path(app.request.attributes.get('_route'),
+                                    app.request.query.all|merge({'pageId': i})) }}>{{ i }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

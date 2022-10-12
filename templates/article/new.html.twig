@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+{% block header %}
+{% endblock %}
+{% block title %}New Article{% endblock %}
+
+{% block body %}
+<body class="container mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
+    {{ include('article/_form.html.twig') }}
+</body>
+{% endblock %}

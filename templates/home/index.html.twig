@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block header %}
+{% endblock %}
+
+{% block body %}
+<div class="bg-image"
+     style="background-image: url('https://hanoispiritofplace.com/wp-content/uploads/2017/11/hinh-nen-game-dep-8.jpg');
+            height: 100vh">
+    <div class="d-flex h-100 text-center text-white " data-new-gr-c-s-check-loaded="14.1081.0" data-gr-ext-installed="">
+
+    <div class=" d-flex w-50 h-50 mx-auto my-auto flex-column">
+
+        <main class="bg-black opacity-75" style="border-radius: 25px;">
+            <h1>Welcome to PC RPG Gamer</h1>
+            <p class="lead">You must first register or login</p>
+            <p class="lead">
+                <a href="{{ path('app_register') }}" class="btn btn-lg btn-secondary fw-bold border-white bg-dark">Register</a>
+                <a href="{{ path('app_login') }}" class="btn btn-lg btn-secondary fw-bold border-white bg-dark">Login</a>
+            </p>
+        </main>
+    </div>
+
+    </div>
+</div>
+
+{% endblock %}
