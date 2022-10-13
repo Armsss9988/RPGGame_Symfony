@@ -81,10 +81,11 @@ class LinkController extends AbstractController
      */
     public function delete(Request $request, Link $link, LinkRepository $linkRepository): Response
     {
+        $game = $link->getGame();
         if ($this->isCsrfTokenValid('delete'.$link->getId(), $request->request->get('_token'))) {
             $linkRepository->remove($link, true);
         }
 
-        return $this->redirectToRoute('app_link_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_game_show', ['id'=>(int)($game->getId())], Response::HTTP_SEE_OTHER);
     }
 }

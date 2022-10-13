@@ -132,7 +132,33 @@
         </div>
     </div>
 {% endif %}
-    <h1 class=" mt-5 text-danger bg-black w-100 border border-warning d-flex justify-content-center rounded"> Link Download</h1>
+    <div class="w-75 rounded border border-danger border-5 mt-5 mx-auto">
+    <h1 class= "mt-1 text-danger bg-black w-100 border border-warning d-flex justify-content-center rounded border border-danger"> Link Download</h1>
+     <div class="row mx-auto">
+         <table class="table text-danger ">
+             <tbody class="mx-auto">
+             {% for link in links %}
+             <tr>
+                 <th>{{ link.Description }}</th>
+                 <td><a href="{{ link.LinkURL }}">{{ link.LinkURL }}</a></td>
+                 <td>{{ include('link/_delete_form.html.twig') }}</td>
+             </tr>
+             {% endfor %}
+             </tbody>
+         </table>
+     </div>
+
+    <label class="text-danger bg-black w-100 border d-flex justify-content-center">
+         EDIT LINK
+    </label>
+    {{ form_start(formLink) }}
+    <div class="w-75 row">
+        <div class="col-7 d-flex justify-content-end">Link Name: {{ form_widget(formLink.Description) }}</div>
+        <div class="col-5 d-flex justify-content-center ">Link URL: {{ form_widget(formLink.LinkURL) }}</div>
+    </div>
+        <button type="submit" class="btn btn-primary text-danger bg-black w-100 border d-flex justify-content-center">SUBMIT</button>
+        {{ form_end(formLink) }}
+    </div>
 
 
 </body>

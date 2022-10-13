@@ -112,20 +112,7 @@ class GameController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $gameRepository->add($game, true);
-            $imageFile = $form->get('imgURL')->getData();
-            if ($imageFile) {
-                $newFilename = 'image'.$game->getId().'.'.$imageFile->guessExtension();
-                try {
-                    $imageFile->move(
-                        $this->getParameter('game_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                }
-                $game->setImgURL($newFilename);
-            }
-            $gameRepository->add($game, true);
-            return $this->redirectToRoute('app_game_index', [], Response::HTTP_SEE_OTHER);
+            return $this->extracted($form, $game, $gameRepository);
         }
 
         return $this->renderForm('game/new.html.twig', [
@@ -204,6 +191,7 @@ class GameController extends AbstractController
             'formArticle' => $formArticle,
             'formLink' => $formLink,
             'article' => $article,
+            'links' => $game->getLinks(),
         ]);
 
     }
@@ -217,21 +205,7 @@ class GameController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('imgURL')->getData();
-            if ($imageFile) {
-                $newFilename = 'image'.$game->getId().'.'.$imageFile->guessExtension();
-                try {
-                    $imageFile->move(
-                        $this->getParameter('game_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                }
-                $game->setImgURL($newFilename);
-            }
-            $gameRepository->add($game, true);
-
-            return $this->redirectToRoute('app_game_index', [], Response::HTTP_SEE_OTHER);
+            return $this->extracted($form, $game, $gameRepository);
         }
         return $this->renderForm('game/edit.html.twig', [
             'game' => $game,
@@ -247,6 +221,31 @@ class GameController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$game->getId(), $request->request->get('_token'))) {
             $gameRepository->remove($game, true);
         }
+
+        return $this->redirectToRoute('app_game_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * @param \Symfony\Component\Form\FormInterface $form
+     * @param Game $game
+     * @param GameRepository $gameRepository
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function extracted(\Symfony\Component\Form\FormInterface $form, Game $game, GameRepository $gameRepository): \Symfony\Component\HttpFoundation\RedirectResponse
+    {
+        $imageFile = $form->get('imgURL')->getData();
+        if ($imageFile) {
+            $newFilename = 'image' . $game->getId() . '.' . $imageFile->guessExtension();
+            try {
+                $imageFile->move(
+                    $this->getParameter('game_directory'),
+                    $newFilename
+                );
+            } catch (FileException $e) {
+            }
+            $game->setImgURL($newFilename);
+        }
+        $gameRepository->add($game, true);
 
         return $this->redirectToRoute('app_game_index', [], Response::HTTP_SEE_OTHER);
     }

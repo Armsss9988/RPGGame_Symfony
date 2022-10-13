@@ -13,7 +13,7 @@ class LinkType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('LinkURL')
+            ->add('LinkURL', TextareaType::class)
             ->add('Description' , TextareaType::class)
         ;
     }
