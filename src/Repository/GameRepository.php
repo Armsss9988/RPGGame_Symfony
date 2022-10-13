@@ -38,6 +38,26 @@ class GameRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+    public function Filter($ram, $diskspace, $category): \Doctrine\ORM\Query
+    {
+        $entityManager = $this->getEntityManager();
+        $qb = $entityManager->createQueryBuilder();
+        $qb->select('g')
+            ->from('App:Game', 'g');
+        if (!is_null($ram) || !empty($ram)) {
+            $qb->where('g.Ram =' .$ram);
+        }
+
+        if (!(is_null($diskspace) || !empty($diskspace))) {
+            $qb->andWhere('g.DiskSpace <=' .$diskspace);
+        }
+ /*       $qb->select('g')->from('game_category','g');
+        if (!(is_null($category) || empty($category)))
+        {
+            $qb->andWhere('g.category_id =' .$category);
+        }*/
+        return $qb->getQuery();
+    }
 
 //    /**
 //     * @return Game[] Returns an array of Game objects

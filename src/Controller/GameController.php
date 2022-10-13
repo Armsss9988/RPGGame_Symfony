@@ -4,12 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Entity\Game;
+use App\Entity\Link;
 use App\Form\ArticleType;
 use App\Form\GameType;
+use App\Form\LinkType;
 use App\Repository\ArticleRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\GameRepository;
-use Doctrine\Common\Collections\Criteria;
+use App\Repository\LinkRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class GameController extends AbstractController
 {
     /**
-     * @Route("/", name="app_game_index", methods={"GET"})
+     * @Route("/{pageId}", name="app_game_index", methods={"GET"})
      */
     public function index(GameRepository $gameRepository, CategoryRepository $categoryRepository, int $pageId = 1, Request $request): Response
     {
@@ -30,18 +33,16 @@ class GameController extends AbstractController
         $ram = $request->query->get('ram');
         $diskSpace = $request->query->get('diskspace');
         $selectedCategoryID = $request->query->get('category');
-        $sortBy = $request->query->get('sort');
-        $orderBy = $request->query->get('order');
         $selectedCategory = $categoryRepository->find((int)$selectedCategoryID);
-        $gameRepo = $gameRepository;
+        /* $gameRepo = $gameRepository;
         if (!is_null($selectedCategory) || !empty(($selectedCategory))) {
             foreach ($gameRepo->findAll() as $game) {
                 if (!$game->Category->contains($selectedCategory)) {
                     $gameRepo->remove($game);
                 }
             }
-        }
-        $expressionBuilder = Criteria::expr();
+        }*/
+        /*$expressionBuilder = Criteria::expr();
         $criteria = new Criteria();
         if (!is_null($ram) && !empty(($ram))) {
             $criteria->where($expressionBuilder->eq('Ram', $ram));
@@ -56,23 +57,40 @@ class GameController extends AbstractController
 
         $numOfItems = $filteredList->count();   // total number of items satisfied above query
         $itemsPerPage = 8; // number of items shown each page
-        $filteredList = $filteredList->slice($itemsPerPage * ($pageId - 1), $itemsPerPage);
+        $filteredList = $filteredList->slice($itemsPerPage * ($pageId - 1), $itemsPerPage);*/
+        $tempQuery = $gameRepository->Filter($ram, $diskSpace, $selectedCategoryID);
+        $pageSize = 4;
+
+// load doctrine Paginator
+        $paginator = new Paginator($tempQuery);
+
+// you can get total items
+        $totalItems = count($paginator);
+
+// get total pages
+        $numOfPages = ceil($totalItems / $pageSize);
+
+// now get one page's items:
+        $tempQuery = $paginator
+            ->getQuery()
+            ->setFirstResult($pageSize * ($pageId - 1)) // set the offset
+            ->setMaxResults($pageSize); // set the limit
         $this->denyAccessUnlessGranted('ROLE_USER');
         $hasAccess = $this->isGranted('ROLE_USER');
         if ($hasAccess) {
             return $this->renderForm('game/index.html.twig', [
-                'games' => $filteredList,
+                'games' => $tempQuery->getResult(),
                 'categories' => $categoryRepository ->findAll(),
                 'category' => $selectedCategory,
                 'selectedCat' => $selectedCategoryID,
-                'numOfPages' => ceil($numOfItems/ $itemsPerPage),
+                'numOfPages' => $numOfPages,
             ]);
         } else {
             return $this->render('game/index.html.twig', [
-                'games' => [],
+                'games' => $tempQuery->getResult(),
                 'categories' => $categoryRepository ->findAll(),
                 'selectedCat' => $selectedCategoryID,
-                'numOfPages' => ceil($numOfItems/ $itemsPerPage),
+                'numOfPages' => $numOfPages,
                 'category' => $selectedCategory,
             ]);
         }
@@ -80,7 +98,7 @@ class GameController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="app_game_new", methods={"GET", "POST"})
+     * @Route("/new/form", name="app_game_new", methods={"GET", "POST"})
      * @param Request $request
      * @param GameRepository $gameRepository
      * @param $slugger
@@ -117,19 +135,37 @@ class GameController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="app_game_show", methods={"GET", "POST"})
+     * @Route("/show/{id}", name="app_game_show", methods={"GET", "POST"})
      */
-    public function show(Request $request,ArticleRepository $articleRepository,Game $game): Response
+    public function show(Request $request, LinkRepository $linkRepository, Game $game, ArticleRepository $articleRepository): Response
     {
        /* $article = new Article();
         $form = $this->createForm(ArticleType::class, $article);*/
-        $article1 = new Article();
-        $form = $this->createForm(ArticleType::class,$article1);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        $article = new Article();
+        $formArticle = $this->createForm(ArticleType::class, $article);
+        $formArticle->handleRequest($request);
+
+        if ($formArticle->isSubmitted() && $formArticle->isValid()) {
+            $article->setGame($game);
+            $articleRepository->add($article, true);
+            return $this->redirectToRoute('app_game_show', ['id'=>(int)($game->getId())], Response::HTTP_SEE_OTHER);
+        }
+            $link = new Link();
+        $formLink = $this->createForm(LinkType::class, $link);
+        $formLink->handleRequest($request);
+
+        if ($formLink->isSubmitted() && $formLink->isValid()) {
+            $link->setGame($game);
+            $linkRepository->add($link, true);
+            return $this->redirectToRoute('app_game_show', ['id'=>(int)($game->getId())], Response::HTTP_SEE_OTHER);
+        }
+        /*$article1 = new Article();
+        $formArticle = $this->createForm(ArticleType::class,$article1);
+        $formArticle->handleRequest($request);
+        if ($formArticle->isSubmitted() && $formArticle->isValid()) {
             $article1->setGame($game);
             $articleRepository->add($article1, true);
-            $imageFile = $form->get('ImgURLArticle')->getData();
+            $imageFile = $formArticle->get('ImgURLArticle')->getData();
             if ($imageFile) {
                 $newFilename = 'image'.$game->getId().'article'.$article1->getId().'.'.$imageFile->guessExtension();
                 try {
@@ -143,7 +179,7 @@ class GameController extends AbstractController
             }
             $articleRepository->add($article1, true);
             return $this->redirectToRoute('app_game_show', ['id'=>(int)($game->getId())], Response::HTTP_SEE_OTHER);
-        }
+        }*/
         /*$form = $this->createForm(ArticleType::class, $article);
 
 
@@ -160,7 +196,8 @@ class GameController extends AbstractController
           /*  'form' => $form,*/
             'game' => $game,
            /* 'forms' => $forms,*/
-            'form' => $form,
+            'formArticle' => $formArticle,
+            'formLink' => $formLink,
         ]);
 
     }

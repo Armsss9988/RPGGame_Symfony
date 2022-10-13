@@ -4,6 +4,9 @@ namespace App\Form;
 
 use App\Entity\Category;
 use App\Entity\Game;
+use EasyCorp\Bundle\EasyAdminBundle\Form\Type\TextEditorType;
+use FOS\CKEditorBundle\Form\Type\CKEditorType;
+use KMS\FroalaEditorBundle\Form\Type\FroalaEditorType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -30,12 +33,7 @@ class GameType extends AbstractType
                 ])
             ->add('imgURL', FileType::class, [
                 'label' => 'Image File',
-
-                // unmapped means that this field is not associated to any entity property
                 'mapped' => false,
-
-                // make it optional so you don't have to re-upload the PDF file
-                // every time you edit the Product details
                 'required' => false,
         ])
         ;

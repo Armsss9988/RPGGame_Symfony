@@ -49,16 +49,29 @@ class Game
      */
     private $imgURL;
 
+
     /**
-     * @ORM\OneToMany(targetEntity=Article::class, mappedBy="Game")
+     * @ORM\OneToMany(targetEntity=Link::class, mappedBy="Game")
      */
-    private $articles;
+    private $links;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $Article;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Article::class, mappedBy="Game", cascade={"persist", "remove"})
+     */
+    private $article;
+
+
 
 
     public function __construct()
     {
         $this->Category = new ArrayCollection();
-        $this->articles = new ArrayCollection();
+        $this->links = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -150,24 +163,6 @@ class Game
         return $this;
     }
 
-    /**
-     * @return Collection<int, Article>
-     */
-    public function getArticles(): Collection
-    {
-        return $this->articles;
-    }
-
-    public function addArticle(Article $article): self
-    {
-        if (!$this->articles->contains($article)) {
-            $this->articles[] = $article;
-            $article->setGame($this);
-        }
-
-        return $this;
-    }
-
     public function removeArticle(Article $article): self
     {
         if ($this->articles->removeElement($article)) {
@@ -180,4 +175,55 @@ class Game
         return $this;
     }
 
+    /**
+     * @return Collection<int, Link>
+     */
+    public function getLinks(): Collection
+    {
+        return $this->links;
+    }
+
+    public function addLink(Link $link): self
+    {
+        if (!$this->links->contains($link)) {
+            $this->links[] = $link;
+            $link->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLink(Link $link): self
+    {
+        if ($this->links->removeElement($link)) {
+            // set the owning side to null (unless already changed)
+            if ($link->getGame() === $this) {
+                $link->setGame(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getArticle(): ?Article
+    {
+        return $this->article;
+    }
+
+    public function setArticle(?Article $article): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($article === null && $this->article !== null) {
+            $this->article->setGame(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($article !== null && $article->getGame() !== $this) {
+            $article->setGame($this);
+        }
+
+        $this->article = $article;
+
+        return $this;
+    }
 }

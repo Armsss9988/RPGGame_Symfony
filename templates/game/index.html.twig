@@ -43,8 +43,8 @@
             {% if category in game.Category or category == null %}
 
             <div class="col">
-                <div class="card border h-100 bg-black" style="">
-                    <img class="h-75 border" src="{{ asset('/image/game/' ~  game.ImgURL) }}">
+                <div class="card border h-100 bg-black " style="width: 15rem; height: 18rem;">
+                    <img class="h-75 border rounded-pill" src="{{ asset('/image/game/' ~  game.ImgURL) }}">
                     <div class="card-img-top ">
                     <div class="card-body w-100 border">
                         <p class="card-title h5 text-truncate text-white ">{{ game.Name }}</p>
@@ -55,7 +55,7 @@
                         {% endfor %}
                         </ul>
                     </div>
-                    <div class="card-footer ">
+                    <div class="card-footer">
                         <a href="{{ path('app_game_show', {'id': game.id}) }}"
                            class="btn btn-primary align-text-bottom ">Show</a>
                     </div>
