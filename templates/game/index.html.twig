@@ -49,8 +49,8 @@
                         <p class="card-title h5 text-truncate text-white ">{{ game.Name }}</p>
                         <ul class="list-group list-group-horizontal overflow-hidden fs-6">
                             <a href="{{ path('app_game_index') }}"style="text-decoration: none;"> <li class="list-group-item text-white bg-black px-1"> Game </li></a>
-                        {% for categoryID in game.getGameCategories() %}
-                            <a href="{{ path('app_game_index',{'category': categoryID}) }}" style="text-decoration: none;"><li class="list-group-item px-1 text-truncate text-white bg-black"> asd</li> </a>
+                        {% for gameCategory in game.getGameCategories() %}
+                            <a href="{{ path('app_game_index',{'categoryID': gameCategory.Category.id}) }}" style="text-decoration: none;"><li class="list-group-item px-1 text-truncate text-white bg-black"> {{ gameCategory.Category.Name }}</li> </a>
                         {% endfor %}
                         </ul>
                     </div>

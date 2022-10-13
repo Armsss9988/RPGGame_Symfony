@@ -55,8 +55,7 @@ class GameRepository extends ServiceEntityRepository
         {
         $qb->addSelect('r')
             ->leftJoin('g.gameCategories', 'r')
-            ->where('r.Category = :parameter')
-            ->setParameter('parameter', $categoryID);
+            ->where('r.Category ='.$categoryID);
         }
 
         return $qb->getQuery();
