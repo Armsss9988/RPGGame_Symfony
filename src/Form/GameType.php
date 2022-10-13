@@ -23,14 +23,6 @@ class GameType extends AbstractType
             ->add('Ram')
             ->add('DiskSpace')
             ->add('UpdateTime',DateType::class, ['widget' => 'single_text',])
-            ->add('Category', EntityType::class,
-            [
-                'class' => Category::class,
-                'choice_label' =>'Name',
-                'disabled' => $options['no_edit'],
-                'multiple' => true,
-                'expanded' => true,
-                ])
             ->add('imgURL', FileType::class, [
                 'label' => 'Image File',
                 'mapped' => false,

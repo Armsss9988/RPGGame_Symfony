@@ -4,12 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Entity\Game;
+use App\Entity\GameCategory;
 use App\Entity\Link;
 use App\Form\ArticleType;
+use App\Form\GameCategoryType;
 use App\Form\GameType;
 use App\Form\LinkType;
 use App\Repository\ArticleRepository;
 use App\Repository\CategoryRepository;
+use App\Repository\GameCategoryRepository;
 use App\Repository\GameRepository;
 use App\Repository\LinkRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -32,7 +35,7 @@ class GameController extends AbstractController
 
         $ram = $request->query->get('ram');
         $diskSpace = $request->query->get('diskspace');
-        $selectedCategoryID = $request->query->get('category');
+        $selectedCategoryID = $request->query->get('categoryID');
         $selectedCategory = $categoryRepository->find((int)$selectedCategoryID);
         /* $gameRepo = $gameRepository;
         if (!is_null($selectedCategory) || !empty(($selectedCategory))) {
@@ -124,11 +127,26 @@ class GameController extends AbstractController
     /**
      * @Route("/show/{id}", name="app_game_show", methods={"GET", "POST"})
      */
-    public function show(Request $request, LinkRepository $linkRepository, Game $game, ArticleRepository $articleRepository): Response
+    public function show(Request $request, LinkRepository $linkRepository, Game $game, ArticleRepository $articleRepository, GameCategoryRepository $gameCategoryRepository ): Response
     {
-       /* $article = new Article();
-        $form = $this->createForm(ArticleType::class, $article);*/
-        if($game->getArticle() == null) {
+        $gameCategory = new GameCategory();
+        $formCategory = $this->createForm(GameCategoryType::class, $gameCategory);
+        $formCategory->handleRequest($request);
+        $duplicate = 0;
+        if ($formCategory->isSubmitted() && $formCategory->isValid()) {
+            foreach ($game->getGameCategories() as $gameCat) {
+                if ($gameCat->getCategory() === $gameCategory->getCategory()) {
+                    $duplicate += 1;
+                }
+                if ($duplicate == 0) {
+                    $gameCategory->setGame($game);
+                    $gameCategoryRepository->add($gameCategory, true);
+                    return $this->redirectToRoute('app_game_show', ['id' => (int)($game->getId())], Response::HTTP_SEE_OTHER);
+                }
+            }
+        }
+
+            if($game->getArticle() == null) {
             $article = new Article();
         }
         else{
@@ -192,6 +210,8 @@ class GameController extends AbstractController
             'formLink' => $formLink,
             'article' => $article,
             'links' => $game->getLinks(),
+            'formCategory' => $formCategory,
+            'gameTypes' => $game->getGameCategories(),
         ]);
 
     }

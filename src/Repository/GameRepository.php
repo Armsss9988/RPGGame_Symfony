@@ -38,25 +38,29 @@ class GameRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-    public function Filter($ram, $diskspace, $category): \Doctrine\ORM\Query
+    public function Filter($ram, $diskspace, $categoryID): \Doctrine\ORM\Query
     {
         $entityManager = $this->getEntityManager();
         $qb = $entityManager->createQueryBuilder();
         $qb->select('g')
             ->from('App:Game', 'g');
-        if (!is_null($ram) || !empty($ram)) {
+        if (!(is_null($ram) || empty($ram))) {
             $qb->where('g.Ram =' .$ram);
         }
 
-        if (!(is_null($diskspace) || !empty($diskspace))) {
+        if (!(is_null($diskspace) || empty($diskspace))) {
             $qb->andWhere('g.DiskSpace <=' .$diskspace);
         }
- /*       $qb->select('g')->from('game_category','g');
-        if (!(is_null($category) || empty($category)))
+        if (!(is_null($categoryID) || empty($categoryID)))
         {
-            $qb->andWhere('g.category_id =' .$category);
-        }*/
+        $qb->addSelect('r')
+            ->leftJoin('g.gameCategories', 'r')
+            ->where('r.Category = :parameter')
+            ->setParameter('parameter', $categoryID);
+        }
+
         return $qb->getQuery();
+
     }
 
 //    /**

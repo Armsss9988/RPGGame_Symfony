@@ -30,13 +30,16 @@ class Category
     private $Description;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Game::class, mappedBy="Category")
+     * @ORM\OneToMany(targetEntity=GameCategory::class, mappedBy="Category", orphanRemoval=true)
      */
-    private $games;
+    private $gameCategories;
+
+
 
     public function __construct()
     {
-        $this->games = new ArrayCollection();
+        $this->gameTypes = new ArrayCollection();
+        $this->gameCategories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,27 +72,30 @@ class Category
     }
 
     /**
-     * @return Collection<int, Game>
+     * @return Collection<int, GameCategory>
      */
-    public function getGames(): Collection
+    public function getGameCategories(): Collection
     {
-        return $this->games;
+        return $this->gameCategories;
     }
 
-    public function addGame(Game $game): self
+    public function addGameCategory(GameCategory $gameCategory): self
     {
-        if (!$this->games->contains($game)) {
-            $this->games[] = $game;
-            $game->addCategory($this);
+        if (!$this->gameCategories->contains($gameCategory)) {
+            $this->gameCategories[] = $gameCategory;
+            $gameCategory->setCategory($this);
         }
 
         return $this;
     }
 
-    public function removeGame(Game $game): self
+    public function removeGameCategory(GameCategory $gameCategory): self
     {
-        if ($this->games->removeElement($game)) {
-            $game->removeCategory($this);
+        if ($this->gameCategories->removeElement($gameCategory)) {
+            // set the owning side to null (unless already changed)
+            if ($gameCategory->getCategory() === $this) {
+                $gameCategory->setCategory(null);
+            }
         }
 
         return $this;

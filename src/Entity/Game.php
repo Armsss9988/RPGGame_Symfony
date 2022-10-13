@@ -25,11 +25,6 @@ class Game
     private $Name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Category::class, inversedBy="games")
-     */
-    public $Category;
-
-    /**
      * @ORM\Column(type="integer", nullable=true)
      */
     private $Ram;
@@ -56,22 +51,20 @@ class Game
     private $links;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private $Article;
-
-    /**
      * @ORM\OneToOne(targetEntity=Article::class, mappedBy="Game", cascade={"persist", "remove"})
      */
     private $article;
 
-
+    /**
+     * @ORM\OneToMany(targetEntity=GameCategory::class, mappedBy="Game", orphanRemoval=true)
+     */
+    private $gameCategories;
 
 
     public function __construct()
     {
-        $this->Category = new ArrayCollection();
         $this->links = new ArrayCollection();
+        $this->gameCategories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -87,30 +80,6 @@ class Game
     public function setName(string $Name): self
     {
         $this->Name = $Name;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Category>
-     */
-    public function getCategory(): Collection
-    {
-        return $this->Category;
-    }
-
-    public function addCategory(Category $category): self
-    {
-        if (!$this->Category->contains($category)) {
-            $this->Category[] = $category;
-        }
-
-        return $this;
-    }
-
-    public function removeCategory(Category $category): self
-    {
-        $this->Category->removeElement($category);
 
         return $this;
     }
@@ -163,17 +132,6 @@ class Game
         return $this;
     }
 
-    public function removeArticle(Article $article): self
-    {
-        if ($this->articles->removeElement($article)) {
-            // set the owning side to null (unless already changed)
-            if ($article->getGame() === $this) {
-                $article->setGame(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Link>
@@ -226,4 +184,35 @@ class Game
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, GameCategory>
+     */
+    public function getGameCategories(): Collection
+    {
+        return $this->gameCategories;
+    }
+
+    public function addGameCategory(GameCategory $gameCategory): self
+    {
+        if (!$this->gameCategories->contains($gameCategory)) {
+            $this->gameCategories[] = $gameCategory;
+            $gameCategory->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGameCategory(GameCategory $gameCategory): self
+    {
+        if ($this->gameCategories->removeElement($gameCategory)) {
+            // set the owning side to null (unless already changed)
+            if ($gameCategory->getGame() === $this) {
+                $gameCategory->setGame(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

@@ -10,8 +10,8 @@
     <body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
         <form class=" row pt-5 align-items-center mx-auto"  >
             Category:
-            <select name="category" class="col-3 me-auto" >
-                <option {{ selectedCat==null ? 'selected'}}>All</option>
+            <select name="categoryID" class="col-3 me-auto" >
+                <option value="" {{ selectedCat==null ? 'selected'}}>All</option>
                 {% for category in categories %}
                     <option value="{{ category.id }}" {{ (selectedCat==category.id) ? 'selected' }}> {{ category.Name }} </option>
                 {% endfor %}
@@ -39,9 +39,8 @@
         {% endif %}
 
     <div class="row row-cols-1 row-cols-md-4  g-4">
+        {% if games != null %}
         {% for game in games %}
-            {% if category in game.Category or category == null %}
-
             <div class="col">
                 <div class="card border h-100 bg-black " style="width: 15rem; height: 18rem;">
                     <img class="h-75 border rounded-pill" src="{{ asset('/image/game/' ~  game.ImgURL) }}">
@@ -50,8 +49,8 @@
                         <p class="card-title h5 text-truncate text-white ">{{ game.Name }}</p>
                         <ul class="list-group list-group-horizontal overflow-hidden fs-6">
                             <a href="{{ path('app_game_index') }}"style="text-decoration: none;"> <li class="list-group-item text-white bg-black px-1"> Game </li></a>
-                        {% for category in game.Category %}
-                            <a href="{{ path('app_game_index',{'category': category.id}) }}" style="text-decoration: none;"><li class="list-group-item px-1 text-truncate text-white bg-black"> {{ category.Name }}</li> </a>
+                        {% for categoryID in game.getGameCategories() %}
+                            <a href="{{ path('app_game_index',{'category': categoryID}) }}" style="text-decoration: none;"><li class="list-group-item px-1 text-truncate text-white bg-black"> asd</li> </a>
                         {% endfor %}
                         </ul>
                     </div>
@@ -62,13 +61,14 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
+        {% endfor %}
+
 
         {% else %}
 
                 <p colspan="6">no game found</p>
+        {% endif %}
 
-        {% endfor %}
     </div>
         <div class="row mt-2">
             <div style="display:flex;text-align:center;justify-content:center">
