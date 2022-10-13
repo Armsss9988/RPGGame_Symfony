@@ -5,7 +5,7 @@
 {% block body %}
 <body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
     <div class="row pt-5">
-        <div class="col-5">
+        <div class="col-6">
             <table class="table text-danger">
                 <tbody>
                     <tr>
@@ -33,55 +33,17 @@
         </div>
 
         <div class="col-6">
+            <img class="border img-fluid w-100"  src="{{ asset('/image/game/' ~  game.ImgURL) }}" alt="">
         </div>
 
-            <div id="main" class="row">
-                <div class="container">
-                    <h1>Carousel with bootstrap</h1>
-                    <div id="carousel-simple" class="carousel slide col-md-6 col-md-offset-3" data-ride="carousel">
-                        <!-- Indicators -->
-                        <ol class="carousel-indicators">
-                            <li data-target="#carousel-simple" data-slide-to="0" class="active"></li>
-                            <li data-target="#carousel-simple" data-slide-to="1"></li>
-                            <li data-target="#carousel-simple" data-slide-to="2"></li>
-                            <li data-target="#carousel-simple" data-slide-to="3"></li>
-                        </ol>
 
-                        <!-- Wrapper for slides -->
-
-                        <div class="carousel-inner" role="listbox">
-                            <div class="item active">
-                                <img src="{{ asset('/image/game/' ~ game.ImgURL) }}" alt="">
-                            </div>
-                            <div class="item">
-                                <img src="{{ asset('/image/game/image1') }}"  alt="">
-                            </div>
-                            <div class="item">
-                                <img src="{{ asset('/image/game/image2') }}"  alt="">
-                            </div>
-                            <div class="item">
-                                <img src="{{ asset('/image/game/image3') }}"  alt="">
-                            </div>
-
-                        </div>
-
-
-                        <!-- Controls -->
-                        <a class="left carousel-control" href="#carousel-simple" role="button" data-slide="prev">
-                            <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                        </a>
-                        <a class="right carousel-control" href="#carousel-simple" role="button" data-slide="next">
-                            <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <h1> Description</h1>
-    <div>
+    <h1 class=" mt-5 text-danger bg-black w-100 border border-warning d-flex justify-content-center"> Description</h1>
+    <div id="content">
+        {{ article.Content | raw }}
 
     </div>
+
+
    {#  <div>
         <h1>Create new Article</h1>
         <iframe src="{{ path('app_article_new',{'id': game.id }) }}" style="height:380px;width:100%"></iframe>
@@ -152,14 +114,25 @@
         #}
     {% if is_granted('ROLE_ADMIN') %}
 
-                    <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class=" row d-flex justify-content-center align-items-center h-100">
                         {{ form_start(formArticle, {'attr': {class:'mx-1 mx-md-4'}}) }}
+                        <label class="text-danger bg-black w-100 border d-flex justify-content-center">
+                            CONTENT EDIT
+                        </label>
+                        {{ form_widget(formArticle.Content) }}
+                        <button type="submit" class="btn btn-primary text-danger bg-black w-100 border d-flex justify-content-center">SUBMIT</button>
                         {{ form_end(formArticle) }}
 
                     </div>
-    {{ include('game/_delete_form.html.twig') }}
-    <a href="{{ path('app_game_edit', {'id': game.id}) }}">edit</a>
+        <div class="row">
+            <div class="col">
+                {{ include('game/_delete_form.html.twig') }}
+            </div>
+            <a type="button" class=" col-2 btn btn-danger" href="{{ path('app_game_edit', {'id': game.id}) }}">Edit this game</a>
+        </div>
+    </div>
 {% endif %}
+    <h1 class=" mt-5 text-danger bg-black w-100 border border-warning d-flex justify-content-center rounded"> Link Download</h1>
 
 
 </body>

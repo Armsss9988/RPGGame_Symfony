@@ -27,6 +27,11 @@ class Link
      */
     private $LinkURL;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $Description;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,6 +57,18 @@ class Link
     public function setLinkURL(?string $LinkURL): self
     {
         $this->LinkURL = $LinkURL;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->Description;
+    }
+
+    public function setDescription(?string $Description): self
+    {
+        $this->Description = $Description;
 
         return $this;
     }

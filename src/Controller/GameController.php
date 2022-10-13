@@ -141,7 +141,12 @@ class GameController extends AbstractController
     {
        /* $article = new Article();
         $form = $this->createForm(ArticleType::class, $article);*/
-        $article = new Article();
+        if($game->getArticle() == null) {
+            $article = new Article();
+        }
+        else{
+            $article = $game->getArticle();
+        }
         $formArticle = $this->createForm(ArticleType::class, $article);
         $formArticle->handleRequest($request);
 
@@ -198,6 +203,7 @@ class GameController extends AbstractController
            /* 'forms' => $forms,*/
             'formArticle' => $formArticle,
             'formLink' => $formLink,
+            'article' => $article,
         ]);
 
     }
