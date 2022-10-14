@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/game/category")
+ * @Route("/categoryGame")
  */
 class GameCategoryController extends AbstractController
 {
@@ -81,10 +81,10 @@ class GameCategoryController extends AbstractController
      */
     public function delete(Request $request, GameCategory $gameCategory, GameCategoryRepository $gameCategoryRepository): Response
     {
+        $game = $gameCategory->getGame();
         if ($this->isCsrfTokenValid('delete'.$gameCategory->getId(), $request->request->get('_token'))) {
             $gameCategoryRepository->remove($gameCategory, true);
         }
-
-        return $this->redirectToRoute('app_game_category_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_game_show', ['id' => (int)($game->getId())], Response::HTTP_SEE_OTHER);
     }
 }

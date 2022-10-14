@@ -4,11 +4,12 @@
 
 {% block body %}
     {% if is_granted('ROLE_ADMIN') %}
-        <a class="btn btn-success" role="button" href="{{ path('app_game_new') }}">Create new</a>
+        <a class="btn btn-success" role="button" href="{{ path('app_game_new') }}">Create New Game</a>
+        <a class="btn btn-success" role="button" href="{{ path('app_category_new') }}">Create New Category</a>
 
     {% endif %}
     <body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
-        <form class=" row pt-5 align-items-center mx-auto"  >
+        <form action="{{ path('app_game_index') }}" class=" row pt-5 align-items-center mx-auto"  >
             Category:
             <select name="categoryID" class="col-3 me-auto" >
                 <option value="" {{ selectedCat==null ? 'selected'}}>All</option>
@@ -21,7 +22,10 @@
             <input type="submit" value="Filter" class="btn btn-dark">
         </form>
         <div class="row">
-            <div class="col-8"><h4>{{ (category == null)? 'Game' : category.Name }}</h4></div>
+            <div class="col-5"><h4>{{ (category == null)? 'Game' : category.Name }}</h4></div>
+            <form class="col-3 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+                <input type="search" name="gameName" class="form-control form-control-dark text-bg-dark" placeholder="Search..." aria-label="Search">
+            </form>
             <div class="col-2 text-end"><p>Sort: </p></div>
             <div class="col-2">
                 <a href="{{ path(app.request.attributes.get('_route'),
@@ -38,7 +42,7 @@
         </div>
         {% endif %}
 
-    <div class="row row-cols-1 row-cols-md-4  g-4">
+    <div class="row row-cols-1 row-cols-md-4">
         {% if games != null %}
         {% for game in games %}
             <div class="col">
@@ -75,11 +79,11 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
                         {% for i in range(1, numOfPages) %}
-                            {% set style = app.request.get('pageId')==i ? "active" : "" %}
+                            {% set style = app.request.get('page')==i ? "active" : "" %}
                             <li class="page-item {{ style }}">
                                 <a class="page-link"
                                    href={{ path(app.request.attributes.get('_route'),
-                                    app.request.query.all|merge({'pageId': i})) }}>{{ i }}</a>
+                                    app.request.query.all|merge({'page': i})) }}>{{ i }}</a>
                             </li>
                         {% endfor %}
                     </ul>

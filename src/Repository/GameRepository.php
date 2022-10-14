@@ -38,7 +38,7 @@ class GameRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-    public function Filter($ram, $diskspace, $categoryID): \Doctrine\ORM\Query
+    public function Filter($ram, $diskspace, $categoryID, $sortBy, $orderBy, $gameSearch): \Doctrine\ORM\Query
     {
         $entityManager = $this->getEntityManager();
         $qb = $entityManager->createQueryBuilder();
@@ -53,10 +53,23 @@ class GameRepository extends ServiceEntityRepository
         }
         if (!(is_null($categoryID) || empty($categoryID)))
         {
-        $qb->addSelect('r')
-            ->leftJoin('g.gameCategories', 'r')
-            ->where('r.Category ='.$categoryID);
+            $qb->addSelect('r')
+                ->leftJoin('g.gameCategories', 'r')
+                ->where('r.Category ='.$categoryID);
         }
+        if(!empty($sortBy)) {
+            if ($orderBy == 'asc'){
+                $qb->addOrderBy('g.Name', 'ASC');
+            }
+            if ($orderBy == 'desc'){
+                $qb->addOrderBy('g.Name', 'desc');
+            }
+        }if(!empty($gameSearch)) {
+        $qb->andWhere($qb->expr()->orX(
+            $qb->expr()->like('g.Name ', ':name')));
+        $qb->setParameter(':name', '%'.$gameSearch.'%');
+        }
+
 
         return $qb->getQuery();
 

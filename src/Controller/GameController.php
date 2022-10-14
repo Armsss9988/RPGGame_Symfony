@@ -28,15 +28,18 @@ use Symfony\Component\Routing\Annotation\Route;
 class GameController extends AbstractController
 {
     /**
-     * @Route("/{pageId}", name="app_game_index", methods={"GET"})
+     * @Route("/{page<\d+>}", name="app_game_index", methods={"GET"})
      */
-    public function index(GameRepository $gameRepository, CategoryRepository $categoryRepository, int $pageId = 1, Request $request): Response
+    public function index(GameRepository $gameRepository, CategoryRepository $categoryRepository, $page = 1, Request $request): Response
     {
-
         $ram = $request->query->get('ram');
         $diskSpace = $request->query->get('diskspace');
         $selectedCategoryID = $request->query->get('categoryID');
         $selectedCategory = $categoryRepository->find((int)$selectedCategoryID);
+        $sortBy = $request->query->get('sort');
+        $orderBy = $request->query->get('order');
+        $gameSearch = $request->query->get('gameName');
+
         /* $gameRepo = $gameRepository;
         if (!is_null($selectedCategory) || !empty(($selectedCategory))) {
             foreach ($gameRepo->findAll() as $game) {
@@ -61,7 +64,7 @@ class GameController extends AbstractController
         $numOfItems = $filteredList->count();   // total number of items satisfied above query
         $itemsPerPage = 8; // number of items shown each page
         $filteredList = $filteredList->slice($itemsPerPage * ($pageId - 1), $itemsPerPage);*/
-        $tempQuery = $gameRepository->Filter($ram, $diskSpace, $selectedCategoryID);
+        $tempQuery = $gameRepository->Filter($ram, $diskSpace, $selectedCategoryID,$sortBy,$orderBy, $gameSearch);
         $pageSize = 4;
 
 // load doctrine Paginator
@@ -76,7 +79,7 @@ class GameController extends AbstractController
 // now get one page's items:
         $tempQuery = $paginator
             ->getQuery()
-            ->setFirstResult($pageSize * ($pageId - 1)) // set the offset
+            ->setFirstResult($pageSize * ($page - 1)) // set the offset
             ->setMaxResults($pageSize); // set the limit
         $this->denyAccessUnlessGranted('ROLE_USER');
         $hasAccess = $this->isGranted('ROLE_USER');
@@ -134,10 +137,12 @@ class GameController extends AbstractController
         $formCategory->handleRequest($request);
         $duplicate = 0;
         if ($formCategory->isSubmitted() && $formCategory->isValid()) {
+            if($game->getGameCategories() != null){
             foreach ($game->getGameCategories() as $gameCat) {
                 if ($gameCat->getCategory() === $gameCategory->getCategory()) {
                     $duplicate += 1;
                 }
+            }
                 if ($duplicate == 0) {
                     $gameCategory->setGame($game);
                     $gameCategoryRepository->add($gameCategory, true);
