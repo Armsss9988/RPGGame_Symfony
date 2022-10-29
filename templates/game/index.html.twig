@@ -35,6 +35,9 @@
                 <a href="{{ path(app.request.attributes.get('_route'),
                     app.request.query.all|merge({'sort': 'Name', 'order': 'asc'})) }}"
                    class="btn btn-primary btn-sm">A - Z</a>
+                <a href="{{ path(app.request.attributes.get('_route'),
+                    app.request.query.all|merge({'sort': '','views': 'Views', 'order': 'asc'})) }}"
+                   class="btn btn-primary btn-sm">Views</a>
             </div>
         </div>
         {% if category != null and category.Description != null %}
@@ -69,10 +72,11 @@
                         <a href="{{ path('app_game_show', {'id': game.id}) }}"
                            class="col btn btn-primary align-text-bottom ">Show</a>
                         <div class="col">
-                            <button class="btn btn-warning"> Views: {{ game.Views }}</button>
+                            <button class="btn btn-warning"> Views:{{ game.Views }}</button>
 
                         </div>
                     </div>
+
                     </div>
                 </div>
             </div>

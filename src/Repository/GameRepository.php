@@ -38,7 +38,7 @@ class GameRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-    public function Filter($ram, $diskspace, $categoryID, $sortBy, $orderBy, $gameSearch): \Doctrine\ORM\Query
+    public function Filter($ram, $diskspace, $categoryID, $sortBy, $orderBy, $gameSearch ,$views): \Doctrine\ORM\Query
     {
         $entityManager = $this->getEntityManager();
         $qb = $entityManager->createQueryBuilder();
@@ -64,13 +64,15 @@ class GameRepository extends ServiceEntityRepository
             if ($orderBy == 'desc'){
                 $qb->addOrderBy('g.Name', 'desc');
             }
-        }if(!empty($gameSearch)) {
+        }
+        if(!empty($views)) {
+                $qb->addOrderBy('g.Views', 'desc');
+        }
+        if(!empty($gameSearch)) {
         $qb->andWhere($qb->expr()->orX(
             $qb->expr()->like('g.Name ', ':name')));
         $qb->setParameter(':name', '%'.$gameSearch.'%');
         }
-
-
         return $qb->getQuery();
 
     }

@@ -45,6 +45,7 @@ class GameController extends AbstractController
         $sortBy = $request->query->get('sort');
         $orderBy = $request->query->get('order');
         $gameSearch = $request->query->get('gameName');
+        $views = $request->query->get('views');
 
         /* $gameRepo = $gameRepository;
         if (!is_null($selectedCategory) || !empty(($selectedCategory))) {
@@ -70,7 +71,7 @@ class GameController extends AbstractController
         $numOfItems = $filteredList->count();   // total number of items satisfied above query
         $itemsPerPage = 8; // number of items shown each page
         $filteredList = $filteredList->slice($itemsPerPage * ($pageId - 1), $itemsPerPage);*/
-        $tempQuery = $gameRepository->Filter($ram, $diskSpace, $selectedCategoryID,$sortBy,$orderBy, $gameSearch);
+        $tempQuery = $gameRepository->Filter($ram, $diskSpace, $selectedCategoryID, $sortBy, $orderBy, $gameSearch, $views);
         $pageSize = 4;
 
 // load doctrine Paginator
@@ -91,7 +92,7 @@ class GameController extends AbstractController
         if ($hasAccess) {
             return $this->renderForm('game/index.html.twig', [
                 'games' => $tempQuery->getResult(),
-                'categories' => $categoryRepository ->findAll(),
+                'categories' => $categoryRepository->findAll(),
                 'category' => $selectedCategory,
                 'selectedCat' => $selectedCategoryID,
                 'numOfPages' => $numOfPages,
@@ -99,7 +100,7 @@ class GameController extends AbstractController
         } else {
             return $this->render('game/index.html.twig', [
                 'games' => $tempQuery->getResult(),
-                'categories' => $categoryRepository ->findAll(),
+                'categories' => $categoryRepository->findAll(),
                 'selectedCat' => $selectedCategoryID,
                 'numOfPages' => $numOfPages,
                 'category' => $selectedCategory,
@@ -107,6 +108,7 @@ class GameController extends AbstractController
         }
 
     }
+
     /**
      * @Route("/gamedashboard", name="app_game_dashboard", methods={"GET"})
      */
@@ -143,6 +145,7 @@ class GameController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $game->setViews(1);
             $gameRepository->add($game, true);
             return $this->extracted($form, $game, $gameRepository);
 
@@ -160,26 +163,25 @@ class GameController extends AbstractController
      */
     public function show(Request $request, LinkRepository $linkRepository, Game $game, ArticleRepository $articleRepository, GameCategoryRepository $gameCategoryRepository, GameRepository $gameRepository): Response
     {
-        if($game->getViews() == null){
+        if ($game->getViews() == null) {
             $game->setViews(1);
             $gameRepository->add($game, true);
-        }
-        else{
-            $views = $game->getViews()+1;
+        } else {
+            $views = $game->getViews() + 1;
             $game->setViews($views);
-            $gameRepository->add($game,true);
+            $gameRepository->add($game, true);
         }
         $gameCategory = new GameCategory();
         $formCategory = $this->createForm(GameCategoryType::class, $gameCategory);
         $formCategory->handleRequest($request);
         $duplicate = 0;
         if ($formCategory->isSubmitted() && $formCategory->isValid()) {
-            if($game->getGameCategories() != null){
-            foreach ($game->getGameCategories() as $gameCat) {
-                if ($gameCat->getCategory() === $gameCategory->getCategory()) {
-                    $duplicate += 1;
+            if ($game->getGameCategories() != null) {
+                foreach ($game->getGameCategories() as $gameCat) {
+                    if ($gameCat->getCategory() === $gameCategory->getCategory()) {
+                        $duplicate += 1;
+                    }
                 }
-            }
                 if ($duplicate == 0) {
                     $gameCategory->setGame($game);
                     $gameCategoryRepository->add($gameCategory, true);
@@ -187,10 +189,9 @@ class GameController extends AbstractController
                 }
             }
         }
-            if($game->getArticle() == null) {
+        if ($game->getArticle() == null) {
             $article = new Article();
-        }
-        else{
+        } else {
             $article = $game->getArticle();
         }
         $formArticle = $this->createForm(ArticleType::class, $article);
@@ -199,16 +200,16 @@ class GameController extends AbstractController
         if ($formArticle->isSubmitted() && $formArticle->isValid()) {
             $article->setGame($game);
             $articleRepository->add($article, true);
-            return $this->redirectToRoute('app_game_show', ['id'=>(int)($game->getId())], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_game_show', ['id' => (int)($game->getId())], Response::HTTP_SEE_OTHER);
         }
-            $link = new Link();
+        $link = new Link();
         $formLink = $this->createForm(LinkType::class, $link);
         $formLink->handleRequest($request);
 
         if ($formLink->isSubmitted() && $formLink->isValid()) {
             $link->setGame($game);
             $linkRepository->add($link, true);
-            return $this->redirectToRoute('app_game_show', ['id'=>(int)($game->getId())], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_game_show', ['id' => (int)($game->getId())], Response::HTTP_SEE_OTHER);
         }
         /*$article1 = new Article();
         $formArticle = $this->createForm(ArticleType::class,$article1);
@@ -244,9 +245,9 @@ class GameController extends AbstractController
         }*/
 
         return $this->renderForm('game/show.html.twig', [
-          /*  'form' => $form,*/
+            /*  'form' => $form,*/
             'game' => $game,
-           /* 'forms' => $forms,*/
+            /* 'forms' => $forms,*/
             'formArticle' => $formArticle,
             'formLink' => $formLink,
             'article' => $article,
@@ -281,7 +282,7 @@ class GameController extends AbstractController
     public function delete(Request $request, Game $game, GameRepository $gameRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        if ($this->isCsrfTokenValid('delete'.$game->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $game->getId(), $request->request->get('_token'))) {
             $gameRepository->remove($game, true);
         }
 
@@ -300,17 +301,31 @@ class GameController extends AbstractController
         if ($imageFile) {
             $newFilename = 'image' . $game->getId() . '.' . $imageFile->guessExtension();
             try {
+                // Retrieve image resolution and aspect ratio.
+                list($width, $height) = getimagesize($imageFile);
+                $aspectRatio = $width / $height;
+                $im = imagecreatefromjpeg($imageFile);
+                // Crop the image based on the provided aspect ratio.
+                if ($aspectRatio !== 1) {
+                    $portrait = $aspectRatio < 1;
+
+                    // This will check if the image is portrait or landscape and crop it square accordingly.
+                    $im2 = imagecrop($im, [
+                        'x' => $portrait ? 0 : (($width - $height) / 2),
+                        'y' => $portrait ? (($width - $height) / 2) : 0,
+                        'width' => $portrait ? $width : $height,
+                        'height' => $portrait ? $width : $height
+                    ]);
+                    imagejpeg($im2,'image/game/'.$newFilename);
+                    imagedestroy($im2);
+                }
                 $imageFile->move(
                     $this->getParameter('game_directory'),
-                    $newFilename
+                    'raw'.$newFilename
                 );
             } catch (FileException $e) {
             }
             $game->setImgURL($newFilename);
-            /*$img = (new Image)->make('public/image/game'.$newFilename);
-
-            $img->resize(200, 200);
-            $img->save('public/'.$newFilename);*/
         }
         $gameRepository->add($game, true);
 
@@ -318,9 +333,6 @@ class GameController extends AbstractController
 
 
     }
-
-
-
 
 
 }
