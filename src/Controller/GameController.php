@@ -17,8 +17,10 @@ use App\Repository\GameCategoryRepository;
 use App\Repository\GameRepository;
 use App\Repository\LinkRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Intervention\Image\Image;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -154,9 +156,19 @@ class GameController extends AbstractController
 
     /**
      * @Route("/show/{id}", name="app_game_show", methods={"GET", "POST"})
+     * @throws \Doctrine\ORM\Exception\ORMException
      */
-    public function show(Request $request, LinkRepository $linkRepository, Game $game, ArticleRepository $articleRepository, GameCategoryRepository $gameCategoryRepository ): Response
+    public function show(Request $request, LinkRepository $linkRepository, Game $game, ArticleRepository $articleRepository, GameCategoryRepository $gameCategoryRepository, GameRepository $gameRepository): Response
     {
+        if($game->getViews() == null){
+            $game->setViews(1);
+            $gameRepository->add($game, true);
+        }
+        else{
+            $views = $game->getViews()+1;
+            $game->setViews($views);
+            $gameRepository->add($game,true);
+        }
         $gameCategory = new GameCategory();
         $formCategory = $this->createForm(GameCategoryType::class, $gameCategory);
         $formCategory->handleRequest($request);
@@ -175,8 +187,6 @@ class GameController extends AbstractController
                 }
             }
         }
-
-
             if($game->getArticle() == null) {
             $article = new Article();
         }

@@ -60,6 +60,11 @@ class Game
      */
     private $gameCategories;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $Views;
+
 
     public function __construct()
     {
@@ -211,6 +216,18 @@ class Game
                 $gameCategory->setGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getViews(): ?int
+    {
+        return $this->Views;
+    }
+
+    public function setViews(?int $Views): self
+    {
+        $this->Views = $Views;
 
         return $this;
     }

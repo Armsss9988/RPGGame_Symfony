@@ -51,7 +51,7 @@
                     <img class="h-75 border rounded-pill img-fluid" src="{{ asset('/image/game/' ~  game.ImgURL) }}">
                     <div class="card-img-top ">
                     <div class="card-body w-100 border">
-                        <p class="card-title h5 text-truncate text-white ">{{ game.Name }}</p>
+                        <p class="card-title h5 text-truncate text-white ">{{ game.Name }} </p>
                         <ul class="list-group list-group-horizontal overflow-hidden fs-6">
                             <a href="{{ path('app_game_index') }}"style="text-decoration: none;">
                                 <li class="list-group-item text-white bg-black px-1"> Game
@@ -65,9 +65,13 @@
                         {% endfor %}
                         </ul>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer row">
                         <a href="{{ path('app_game_show', {'id': game.id}) }}"
-                           class="btn btn-primary align-text-bottom ">Show</a>
+                           class="col btn btn-primary align-text-bottom ">Show</a>
+                        <div class="col">
+                            <button class="btn btn-warning"> Views: {{ game.Views }}</button>
+
+                        </div>
                     </div>
                     </div>
                 </div>
