@@ -1,0 +1,42 @@
+
+{% block body %}
+<body class="container-sm  mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-10 text-white">
+<table class="table text-danger bg-black bg-opacity-75">
+    <thead>
+    <tr >
+        <th>Id</th>
+        <th>Name</th>
+        <th>Categories</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for game in games %}
+        <tr>
+            <td>{{ game.id }}</td>
+            <td>{{ game.Name }}</td>
+            <td>
+                <ul class="list-group list-group-horizontal overflow-hidden fs-6">
+                    <a href="{{ path('app_game_index') }}"style="text-decoration: none;">
+                        <li class="list-group-item text-white bg-black px-1"> Game
+                        </li>
+                    </a>
+                    {% for gameCategory in game.getGameCategories() %}
+                        <a href="{{ path('app_game_index',{'categoryID': gameCategory.Category.id}) }}" style="text-decoration: none;">
+                            <li class="list-group-item px-1 text-truncate text-white bg-black"> {{ gameCategory.Category.Name }}
+                            </li>
+                        </a>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="4">no records found</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+
+{% endblock %}

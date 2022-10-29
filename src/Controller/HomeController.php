@@ -21,4 +21,16 @@ class HomeController extends AbstractController
         }
         return $this->render('home/index.html.twig');
     }
+    /**
+     * @Route("/dashboard", name="app_dashboard")
+     */
+    public function dashboard(): Response
+    {
+        $hasAccess = $this->isGranted('ROLE_ADMIN');
+        if($hasAccess)
+        {
+            return $this->render('home/dashboard.html.twig');
+        }
+        return $this->render('home/index.html.twig');
+    }
 }

@@ -1,16 +1,13 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Link index{% endblock %}
 
 {% block body %}
     <h1>Link index</h1>
 
-    <table class="table">
+    <table class="table text-danger bg-black bg-opacity-75">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>LinkURL</th>
-                <th>actions</th>
+                <th>Game</th>
             </tr>
         </thead>
         <tbody>
@@ -18,10 +15,7 @@
             <tr>
                 <td>{{ link.id }}</td>
                 <td>{{ link.LinkURL }}</td>
-                <td>
-                    <a href="{{ path('app_link_show', {'id': link.id}) }}">show</a>
-                    <a href="{{ path('app_link_edit', {'id': link.id}) }}">edit</a>
-                </td>
+                <td>{{ link.getGame().id }}</td>
             </tr>
         {% else %}
             <tr>
@@ -30,6 +24,4 @@
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_link_new') }}">Create new</a>
 {% endblock %}

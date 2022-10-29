@@ -10,17 +10,21 @@ use App\Form\ArticleType;
 use App\Form\GameCategoryType;
 use App\Form\GameType;
 use App\Form\LinkType;
+use App\ImageOptimizer;
 use App\Repository\ArticleRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\GameCategoryRepository;
 use App\Repository\GameRepository;
 use App\Repository\LinkRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Intervention\Image\Image;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+
 
 /**
  * @Route("/game")
@@ -81,7 +85,6 @@ class GameController extends AbstractController
             ->getQuery()
             ->setFirstResult($pageSize * ($page - 1)) // set the offset
             ->setMaxResults($pageSize); // set the limit
-        $this->denyAccessUnlessGranted('ROLE_USER');
         $hasAccess = $this->isGranted('ROLE_USER');
         if ($hasAccess) {
             return $this->renderForm('game/index.html.twig', [
@@ -102,6 +105,27 @@ class GameController extends AbstractController
         }
 
     }
+    /**
+     * @Route("/gamedashboard", name="app_game_dashboard", methods={"GET"})
+     */
+    public function game_dashboard(GameRepository $gameRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        return $this->render('game/game_dashboard.html.twig', [
+            'games' => $gameRepository->findAll(),
+        ]);
+    }
+
+    /**
+     * @Route("/usersdashboard", name="app_user_dashboard", methods={"GET"})
+     */
+    public function user_dashboard(UserRepository $userRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        return $this->render('user/user.html.twig', [
+            'users' => $userRepository->findAll(),
+        ]);
+    }
 
     /**
      * @Route("/new/form", name="app_game_new", methods={"GET", "POST"})
@@ -119,6 +143,7 @@ class GameController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $gameRepository->add($game, true);
             return $this->extracted($form, $game, $gameRepository);
+
         }
 
         return $this->renderForm('game/new.html.twig', [
@@ -150,6 +175,7 @@ class GameController extends AbstractController
                 }
             }
         }
+
 
             if($game->getArticle() == null) {
             $article = new Article();
@@ -226,6 +252,7 @@ class GameController extends AbstractController
      */
     public function edit(Request $request, Game $game, GameRepository $gameRepository): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $form = $this->createForm(GameType::class, $game);
         $form->handleRequest($request);
 
@@ -243,6 +270,7 @@ class GameController extends AbstractController
      */
     public function delete(Request $request, Game $game, GameRepository $gameRepository): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         if ($this->isCsrfTokenValid('delete'.$game->getId(), $request->request->get('_token'))) {
             $gameRepository->remove($game, true);
         }
@@ -269,9 +297,20 @@ class GameController extends AbstractController
             } catch (FileException $e) {
             }
             $game->setImgURL($newFilename);
+            /*$img = (new Image)->make('public/image/game'.$newFilename);
+
+            $img->resize(200, 200);
+            $img->save('public/'.$newFilename);*/
         }
         $gameRepository->add($game, true);
 
         return $this->redirectToRoute('app_game_index', [], Response::HTTP_SEE_OTHER);
+
+
     }
+
+
+
+
+
 }

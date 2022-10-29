@@ -35,6 +35,8 @@ security:
              - { path: ^/gameCategory, roles: ROLE_ADMIN }
              - { path: ^/link, roles: ROLE_ADMIN }
              - { path: ^/article, roles: ROLE_ADMIN }
+             - { path: ^/game/new/form, roles: ROLE_ADMIN }
+
 
         # - { path: ^/profile, roles: ROLE_USER }
     role_hierarchy:

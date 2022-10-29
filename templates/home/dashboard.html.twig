@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    <body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
+<script type="text/javascript">
+    function table(){
+        const xhttp = new XMLHttpRequest();
+        var value = document.getElementById("table_id").value;
+        xhttp.onload = function(){
+            document.getElementById("dashboard_table").innerHTML = this.responseText;
+        }
+        if( value === 'link') {
+            xhttp.open("GET", "{{ path('app_link_index') }}");
+        }
+        if( value === 'game') {
+            xhttp.open("GET", "{{ path('app_game_dashboard') }}");
+        }
+        if( value === 'category') {
+            xhttp.open("GET", "{{ path('app_category_index') }}");
+        }
+        if( value === 'user') {
+            xhttp.open("GET", "{{ path('app_user_dashboard') }}");
+        }
+        xhttp.send();
+    }
+    setInterval(function(){
+        table();
+    }, 1000);
+</script>
+<h1 class="d-flex justify-content-center">DASHBOARD</h1>
+    <label class="d-flex justify-content-center">
+        <select name="table_id" id="table_id">
+            <option selected>Open this select table</option>
+            <option value="game">Game</option>
+            <option value="category">Category</option>
+            <option value="link">Link</option>
+            <option value="user">User</option>
+        </select>
+    </label>
+     <div id="dashboard_table"></div>
+
+    </body>
+{% endblock %}
