@@ -10,9 +10,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class LinkType extends AbstractType
 {
+    //build form for Link
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            // Game of Link will be set in Controller after submit
             ->add('LinkURL', TextareaType::class)
             ->add('Description' , TextareaType::class)
         ;

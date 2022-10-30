@@ -6,6 +6,8 @@
     <tr >
         <th>Id</th>
         <th>Name</th>
+        <th>Ram</th>
+        <th>Diskspace</th>
         <th>Categories</th>
         <th>Views</th>
     </tr>
@@ -15,6 +17,8 @@
         <tr>
             <td>{{ game.id }}</td>
             <td>{{ game.Name }}</td>
+            <td>{{ game.Ram ~ " GB" }}</td>
+            <td>{{ (game.DiskSpace < 1) ? game.Diskspace*1000 ~ ' MB' : game.Diskspace ~ ' GB' }}</td>
             <td>
                 <ul class="list-group list-group-horizontal overflow-hidden fs-6">
                     <a href="{{ path('app_game_index') }}"style="text-decoration: none;">

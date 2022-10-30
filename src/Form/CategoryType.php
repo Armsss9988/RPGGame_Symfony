@@ -11,8 +11,10 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 class CategoryType extends AbstractType
 {
+    // build form Category
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Game of this category is set in Entity GameCategory
         $builder
             ->add('Name')
             ->add('Description')

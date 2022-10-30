@@ -36,6 +36,8 @@ security:
              - { path: ^/link, roles: ROLE_ADMIN }
              - { path: ^/article, roles: ROLE_ADMIN }
              - { path: ^/game/new/form, roles: ROLE_ADMIN }
+             - { path: ^/game, roles: ROLE_USER }
+             - { path: ^/category, roles: ROLE_USER }
 
 
         # - { path: ^/profile, roles: ROLE_USER }

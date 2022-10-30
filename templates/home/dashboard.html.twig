@@ -1,11 +1,16 @@
 {% extends 'base.html.twig' %}
+{% block title %}Dashboard{% endblock %}
 {% block body %}
     <body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
+    <%# using ajax to show page in to div %>
 <script type="text/javascript">
     function table(){
+        //call xhttp
         const xhttp = new XMLHttpRequest();
+        //get value of select element id : table_id
         var value = document.getElementById("table_id").value;
         xhttp.onload = function(){
+            //get information form page to div with id "dashboard_table"
             document.getElementById("dashboard_table").innerHTML = this.responseText;
         }
         if( value === 'link') {
@@ -22,11 +27,13 @@
         }
         xhttp.send();
     }
+    // reload function per 1 sec
     setInterval(function(){
         table();
     }, 1000);
 </script>
 <h1 class="d-flex justify-content-center">DASHBOARD</h1>
+    <%# Choose value to get page %>
     <label class="d-flex justify-content-center">
         <select name="table_id" id="table_id">
             <option selected>Open this select table</option>

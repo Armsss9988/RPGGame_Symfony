@@ -36,8 +36,13 @@ class GameController extends AbstractController
     /**
      * @Route("/{page<\d+>}", name="app_game_index", methods={"GET"})
      */
-    public function index(GameRepository $gameRepository, CategoryRepository $categoryRepository, $page = 1, Request $request): Response
+    //Perform actions when the user redirects to this route and renders the page.
+    public function index(GameRepository $gameRepository,
+                          CategoryRepository $categoryRepository,
+                          $page = 1,
+                          Request $request): Response
     {
+        //Declare variables and assign values from the values of the elements in the template
         $ram = $request->query->get('ram');
         $diskSpace = $request->query->get('diskspace');
         $selectedCategoryID = $request->query->get('categoryID');
@@ -71,25 +76,22 @@ class GameController extends AbstractController
         $numOfItems = $filteredList->count();   // total number of items satisfied above query
         $itemsPerPage = 8; // number of items shown each page
         $filteredList = $filteredList->slice($itemsPerPage * ($pageId - 1), $itemsPerPage);*/
+        //implement the Filter function we mentioned above.
         $tempQuery = $gameRepository->Filter($ram, $diskSpace, $selectedCategoryID, $sortBy, $orderBy, $gameSearch, $views);
-        $pageSize = 4;
-
+        //Create a variable that assigns a value to the number of games displayed in a paginator
+        $pageSize = 8;
 // load doctrine Paginator
         $paginator = new Paginator($tempQuery);
-
 // you can get total items
         $totalItems = count($paginator);
-
 // get total pages
         $numOfPages = ceil($totalItems / $pageSize);
-
 // now get one page's items:
         $tempQuery = $paginator
             ->getQuery()
             ->setFirstResult($pageSize * ($page - 1)) // set the offset
             ->setMaxResults($pageSize); // set the limit
-        $hasAccess = $this->isGranted('ROLE_USER');
-        if ($hasAccess) {
+            //show index page.
             return $this->renderForm('game/index.html.twig', [
                 'games' => $tempQuery->getResult(),
                 'categories' => $categoryRepository->findAll(),
@@ -97,16 +99,6 @@ class GameController extends AbstractController
                 'selectedCat' => $selectedCategoryID,
                 'numOfPages' => $numOfPages,
             ]);
-        } else {
-            return $this->render('game/index.html.twig', [
-                'games' => $tempQuery->getResult(),
-                'categories' => $categoryRepository->findAll(),
-                'selectedCat' => $selectedCategoryID,
-                'numOfPages' => $numOfPages,
-                'category' => $selectedCategory,
-            ]);
-        }
-
     }
 
     /**
@@ -115,6 +107,7 @@ class GameController extends AbstractController
     public function game_dashboard(GameRepository $gameRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        //display dashboard website
         return $this->render('game/game_dashboard.html.twig', [
             'games' => $gameRepository->findAll(),
         ]);
@@ -143,14 +136,13 @@ class GameController extends AbstractController
         $game = new Game();
         $form = $this->createForm(GameType::class, $game);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-            $game->setViews(1);
+            //set view when new game created
+            $game->setViews(0);
             $gameRepository->add($game, true);
+            //use function image
             return $this->extracted($form, $game, $gameRepository);
-
         }
-
         return $this->renderForm('game/new.html.twig', [
             'game' => $game,
             'form' => $form,
@@ -161,21 +153,48 @@ class GameController extends AbstractController
      * @Route("/show/{id}", name="app_game_show", methods={"GET", "POST"})
      * @throws \Doctrine\ORM\Exception\ORMException
      */
-    public function show(Request $request, LinkRepository $linkRepository, Game $game, ArticleRepository $articleRepository, GameCategoryRepository $gameCategoryRepository, GameRepository $gameRepository): Response
+    //when user go to this route, function will be run and display game/show.html.twig templates.
+    public function show(Request $request,
+                         LinkRepository $linkRepository,
+                         Game $game, ArticleRepository $articleRepository,
+                         GameCategoryRepository $gameCategoryRepository,
+                         GameRepository $gameRepository,
+                         UserRepository $userRepository): Response
     {
+        //add game to table rencenty_game_view with this user
+          //get user variable
+        $user = $this->getUser();
+        //add game
+        $user->addRecentlyGame($game);
+        //check if number of game in user_game_view with this user larger than 4
+        if(count($user->getRecentlyGame()) >= 5)
+        {
+            //delete the oldest game from the list
+            foreach ($user->getRecentlyGame() as $recent)
+            {
+                $user->removeRecentlyGame($recent);
+                $userRepository->add($user, true);
+                break;
+            }
+        }
+        //plus view for game
+        // if game not have view yet, set to 1.
         if ($game->getViews() == null) {
             $game->setViews(1);
             $gameRepository->add($game, true);
         } else {
+            //plus view
             $views = $game->getViews() + 1;
             $game->setViews($views);
             $gameRepository->add($game, true);
         }
+        //processing form add category to this game.
         $gameCategory = new GameCategory();
         $formCategory = $this->createForm(GameCategoryType::class, $gameCategory);
         $formCategory->handleRequest($request);
         $duplicate = 0;
         if ($formCategory->isSubmitted() && $formCategory->isValid()) {
+            //check duplicate in table if already have this game with this category in database
             if ($game->getGameCategories() != null) {
                 foreach ($game->getGameCategories() as $gameCat) {
                     if ($gameCat->getCategory() === $gameCategory->getCategory()) {
@@ -183,32 +202,43 @@ class GameController extends AbstractController
                     }
                 }
                 if ($duplicate == 0) {
+                    //if not set this game for new category
                     $gameCategory->setGame($game);
                     $gameCategoryRepository->add($gameCategory, true);
+                    //reload page
                     return $this->redirectToRoute('app_game_show', ['id' => (int)($game->getId())], Response::HTTP_SEE_OTHER);
                 }
             }
         }
+        //processing Article form
         if ($game->getArticle() == null) {
+            //create new if game heaven't have article yet
             $article = new Article();
         } else {
+            //edit if game already have article
             $article = $game->getArticle();
         }
         $formArticle = $this->createForm(ArticleType::class, $article);
         $formArticle->handleRequest($request);
 
         if ($formArticle->isSubmitted() && $formArticle->isValid()) {
+            //set game for this article if submitted
             $article->setGame($game);
             $articleRepository->add($article, true);
+            //reload
             return $this->redirectToRoute('app_game_show', ['id' => (int)($game->getId())], Response::HTTP_SEE_OTHER);
         }
+        //processing link form
+        //create link
         $link = new Link();
         $formLink = $this->createForm(LinkType::class, $link);
         $formLink->handleRequest($request);
 
         if ($formLink->isSubmitted() && $formLink->isValid()) {
+            //set this game to this link
             $link->setGame($game);
             $linkRepository->add($link, true);
+            //reload
             return $this->redirectToRoute('app_game_show', ['id' => (int)($game->getId())], Response::HTTP_SEE_OTHER);
         }
         /*$article1 = new Article();
@@ -243,7 +273,7 @@ class GameController extends AbstractController
                  return $this->redirectToRoute('app_game_show', ['id'=>(int)($game->getId())], Response::HTTP_SEE_OTHER);
             }
         }*/
-
+        //render page with variable
         return $this->renderForm('game/show.html.twig', [
             /*  'form' => $form,*/
             'game' => $game,
@@ -254,6 +284,7 @@ class GameController extends AbstractController
             'links' => $game->getLinks(),
             'formCategory' => $formCategory,
             'gameTypes' => $game->getGameCategories(),
+            'games' => $user->getRecentlyGame()
         ]);
 
     }
@@ -295,10 +326,16 @@ class GameController extends AbstractController
      * @param GameRepository $gameRepository
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function extracted(\Symfony\Component\Form\FormInterface $form, Game $game, GameRepository $gameRepository): \Symfony\Component\HttpFoundation\RedirectResponse
+    //function to upload and resize image.
+    public function extracted(\Symfony\Component\Form\FormInterface $form,
+                              Game $game,
+                              GameRepository $gameRepository):
+                                \Symfony\Component\HttpFoundation\RedirectResponse
     {
+        //get image from edit or create game form
         $imageFile = $form->get('imgURL')->getData();
         if ($imageFile) {
+            //set image's name
             $newFilename = 'image' . $game->getId() . '.' . $imageFile->guessExtension();
             try {
                 // Retrieve image resolution and aspect ratio.
@@ -316,15 +353,18 @@ class GameController extends AbstractController
                         'width' => $portrait ? $width : $height,
                         'height' => $portrait ? $width : $height
                     ]);
+                    //create resized image and put to public/image/game folder
                     imagejpeg($im2,'image/game/'.$newFilename);
                     imagedestroy($im2);
                 }
+                //put original file to public/image/game folder
                 $imageFile->move(
                     $this->getParameter('game_directory'),
                     'raw'.$newFilename
                 );
             } catch (FileException $e) {
             }
+            //add image name to Game.
             $game->setImgURL($newFilename);
         }
         $gameRepository->add($game, true);

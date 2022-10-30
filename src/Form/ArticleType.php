@@ -10,13 +10,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ArticleType extends AbstractType
 {
+    //build form article
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            //form only have content because Game of Article is set after submit form
             ->add('Content', CKEditorType::class)
         ;
     }
-
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

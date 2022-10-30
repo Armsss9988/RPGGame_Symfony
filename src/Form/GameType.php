@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 class GameType extends AbstractType
 {
+    //build form for GAME!!!!!
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -23,6 +24,7 @@ class GameType extends AbstractType
             ->add('Ram')
             ->add('DiskSpace')
             ->add('UpdateTime',DateType::class, ['widget' => 'single_text',])
+            //this will create an option to choose image in form
             ->add('imgURL', FileType::class, [
                 'label' => 'Image File',
                 'mapped' => false,

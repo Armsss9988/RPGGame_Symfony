@@ -1,11 +1,11 @@
 
 {% block body %}
     <h1>Link index</h1>
-
     <table class="table text-danger bg-black bg-opacity-75">
         <thead>
             <tr>
                 <th>Id</th>
+                <th>Type</th>
                 <th>LinkURL</th>
                 <th>Game</th>
             </tr>
@@ -14,6 +14,7 @@
         {% for link in links %}
             <tr>
                 <td>{{ link.id }}</td>
+                <td>{{ link.description }}</td>
                 <td>{{ link.LinkURL }}</td>
                 <td>{{ link.getGame().id }}</td>
             </tr>

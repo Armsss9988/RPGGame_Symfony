@@ -33,13 +33,10 @@ class CategoryController extends AbstractController
         $category = new Category();
         $form = $this->createForm(CategoryType::class, $category);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $categoryRepository->add($category, true);
-
             return $this->redirectToRoute('app_game_index', [], Response::HTTP_SEE_OTHER);
         }
-
         return $this->renderForm('category/new.html.twig', [
             'category' => $category,
             'form' => $form,

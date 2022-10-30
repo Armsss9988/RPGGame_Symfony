@@ -1,108 +1,109 @@
 {% extends 'base.html.twig' %}
-
 {% block title %}Game{% endblock %}
-
 {% block body %}
-<body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
+    <body class="container-sm w-75 mt-5 mx-auto justify-content-center align-items-center bg-black bg-opacity-75 text-white">
     <div class="row pt-5">
         <div class="col-6">
             <table class="table text-danger">
                 <tbody>
-                    <tr>
-                        <th>Id</th>
-                        <td>{{ game.id }}</td>
-                    </tr>
-                    <tr>
-                        <th>Name</th>
-                        <td>{{ game.Name }}</td>
-                    </tr>
-                    <tr>
-                        <th>Ram</th>
-                        <td>{{ game.Ram }}</td>
-                    </tr>
-                    <tr>
-                        <th>DiskSpace</th>
-                        <td>{{ game.DiskSpace }}</td>
-                    </tr>
-                    <tr>
-                        <th>UpdateTime</th>
-                        <td>{{ game.UpdateTime ? game.UpdateTime|date('Y-m-d') : '' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Views</th>
-                        <td>{{ game.Views}}</td>
-                    </tr>
-                    <tr>
-                        <th>Category</th>
-                        <td>
-                            <ul class="list-group list-group-horizontal col">
-                                {% for gameCategory in game.getGameCategories() %}
-                                    <a href="{{ path('app_game_index',{'categoryID': gameCategory.Category.id}) }}" style="text-decoration: none;"><li class="list-group-item px-1 text-truncate text-danger bg-black bg-opacity-10"> {{ gameCategory.Category.Name }}</li> </a>
-                                    {% if is_granted('ROLE_ADMIN') %}
-                                        {{ include('game_category/_delete_form.html.twig') }}
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </td>
-                    </tr>
+                {% if is_granted('ROLE_ADMIN') %}
+                <tr>
+                    <th>Id</th>
+                    <td>{{ game.id }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <th>Name</th>
+                    <td>{{ game.Name }}</td>
+                </tr>
+                <tr>
+                    <th>Ram</th>
+                    <td>{{ game.Ram ~ ' GB' }}</td>
+                </tr>
+                <tr>
+                    <th>DiskSpace</th>
+                    <td>{{ (game.DiskSpace < 1) ? game.Diskspace*1000 ~ ' MB' : game.Diskspace ~ ' GB' }}</td>
+                </tr>
+                <tr>
+                    <th>UpdateTime</th>
+                    <td>{{ game.UpdateTime ? game.UpdateTime|date('Y-m-d') : '' }}</td>
+                </tr>
+                <tr>
+                    <th>Views</th>
+                    <td>{{ game.Views }}</td>
+                </tr>
+                <tr>
+                    <th>Category</th>
+                    <td>
+                        <ul class="list-group list-group-horizontal col">
+                            {% for gameCategory in game.getGameCategories() %}
+                                <a href="{{ path('app_game_index',{'categoryID': gameCategory.Category.id}) }}"
+                                   style="text-decoration: none;">
+                                    <li class="list-group-item px-1 text-truncate text-danger bg-black bg-opacity-10"> {{ gameCategory.Category.Name }}</li>
+                                </a>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    {{ include('game_category/_delete_form.html.twig') }}
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
                 </tbody>
             </table>
             {% if is_granted('ROLE_ADMIN') %}
-            <div class="border border-danger w-50">
-            {{ form_start(formCategory) }}
-            <label class="d-flex justify-content-center w-100 text-danger ">ADD Category</label>
-            {{ form_widget(formCategory.Category, {
-                'attr': {class: 'form-control'}
-            }) }}
-            <button type="submit" class=" w-100 btn btn-primary text-danger bg-black border border-danger rounded-pill">Submit</button>
-            {{ form_end(formCategory) }}
-            </div>
+                <div class="border border-danger w-50">
+                    {{ form_start(formCategory) }}
+                    <label class="d-flex justify-content-center w-100 text-danger ">ADD Category</label>
+                    {{ form_widget(formCategory.Category, {
+                        'attr': {class: 'form-control'}
+                    }) }}
+                    <button type="submit"
+                            class=" w-100 btn btn-primary text-danger bg-black border border-danger rounded-pill">Submit
+                    </button>
+                    {{ form_end(formCategory) }}
+                </div>
             {% endif %}
         </div>
 
         <div class="col-6">
-            <img class="border img-fluid w-100"  src="{{ asset('/image/game/' ~  game.ImgURL) }}" alt="">
+            <img class="border img-fluid w-100" src="{{ asset('/image/game/' ~  game.ImgURL) }}" alt="">
         </div>
-
-
-    <h1 class=" mt-5 text-danger bg-black w-100 border border-warning d-flex justify-content-center"> Description</h1>
-    <div id="content">
-        {{ article.Content | raw }}
-
     </div>
-
-
-   {#  <div>
+    <div class="row">
+        <img src="{{ asset('/checkout.png') }}">
+        <div id="content" class="row vertical-gap">
+            <div class="col-lg-8" >
+                <img src="{{ asset('/description.png') }}" class=" mt-5 text-danger bg-black w-100 d-flex justify-content-center" style="background-image: url('https://media.istockphoto.com/photos/black-grey-wooden-plank-wall-texture-background-old-natural-pattern-picture-id1321288902?b=1&k=20&m=1321288902&s=170667a&w=0&h=JpmqzaVRY0z5Q20nSyteIx3rk9WUutTz5Kx4HeTjcGI=');">
+                {{ article.Content | raw }}
+            </div>
+            {#  <div>
         <h1>Create new Article</h1>
         <iframe src="{{ path('app_article_new',{'id': game.id }) }}" style="height:380px;width:100%"></iframe>
-    </div>#}
-
-
-
-{#    haha:
+    </div> #}
+            {#    haha:
 
     {% set divid = 0 %}
-    {% set i = -1 %}#}
-{#    {% for article in game.getArticles %}
-#}{#        {% set i = i + 1 %}
-{% set divid = divid + 1 %}#}{#
-        <div class="row">
-            <span class="button button-success">{{ article.Title }}</span>
-        </div>
-        <div class="row">
-    <h6>{{ article.Paragraph }}</h6>
-        </div>
-        <div class="row">
-            {% if article.ImgURLArticle != null %}
-            <img class="h-75 w-auto" src="{{ asset('/image/game/article/' ~  article.ImgURLArticle) }}">
-            {% endif %}
-        </div>
-        {% if is_granted('ROLE_ADMIN') %}
-        <div class="row">
-            {{ include('article/_delete_form.html.twig') }}
-        </div>
-        {% endif %}#}
-        {#<div class="row">
+    {% set i = -1 %} #}
+            {#    {% for article in game.getArticles %}
+            #}{#        {% set i = i + 1 %}
+{% set divid = divid + 1 %} #}{#
+            <div class="row">
+                <span class="button button-success">{{ article.Title }}</span>
+            </div>
+            <div class="row">
+        <h6>{{ article.Paragraph }}</h6>
+            </div>
+            <div class="row">
+                {% if article.ImgURLArticle != null %}
+                <img class="h-75 w-auto" src="{{ asset('/image/game/article/' ~  article.ImgURLArticle) }}">
+                {% endif %}
+            </div>
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="row">
+                {{ include('article/_delete_form.html.twig') }}
+            </div>
+            {% endif %} #}
+            {# <div class="row">
             <button id="edit {{ divid }}" onclick="toggleBlock{{ divid }}()">Edit</button>
         </div>
 
@@ -120,74 +121,125 @@
             </div>
         </div>
     {{ form_end(forms[i]) }}
-    #}
+            #}
+            {#
+            <script>
+                function toggleBlock{{ divid }}() {
+                    var myBlock = document.getElementById("{{ divid }}");
 
+                    var blockButton = document.getElementById("edit {{ divid }}");
 
-{#
-        <script>
-            function toggleBlock{{ divid }}() {
-                var myBlock = document.getElementById("{{ divid }}");
-
-                var blockButton = document.getElementById("edit {{ divid }}");
-
-                if (myBlock.hidden) {
-                    blockButton.innerHTML = "Close";
-                    myBlock.hidden = false;
-                } else {
-                    blockButton.innerHTML = "Edit";
-                    myBlock.hidden = true;
+                    if (myBlock.hidden) {
+                        blockButton.innerHTML = "Close";
+                        myBlock.hidden = false;
+                    } else {
+                        blockButton.innerHTML = "Edit";
+                        myBlock.hidden = true;
+                    }
                 }
-            }
-        </script>
-        #}
-    {% if is_granted('ROLE_ADMIN') %}
+            </script>
+            #}
+            <div class="col-lg-4" style="min-height: 100px;">
+                    <!-- START: Sidebar -->
+                <div class="row sticky-top sticky-bottom" style="min-height: 100px;">
+                    <div class="terContainer sticky-top sticky-bottom" style="z-index: 2">
+                        <div class="row nk-widget nk-widget-highlighted pt-5 mt-5 d-flex justify-content-center">
+                            <img class="img-thumbnail h-75 w-75 bg-dark rounded-pill img-fluid"
+                                 src="{{ asset('/back1.png') }}">
+                        </div>
+                        {% for game in games %}
+                        <div class="card bg-black bg-opacity-25">
+                            <div class="row g-0">
+                                <div class="col-4">
+                                    <img class="img-thumbnail h-75 rounded-pill img-fluid"
+                                         src="{{ asset('/image/game/' ~  game.ImgURL) }}">
+                                </div>
+                                <div class="col-8">
+                                    <div class="card-body w-100 h-50 mx-auto ">
+                                        <p class="card-title h5 text-truncate text-white ">{{ game.Name }} </p>
+                                        <ul class="list-group list-group-horizontal overflow-hidden fs-6">
+                                            <a href="{{ path('app_game_index') }}" style="text-decoration: none;">
+                                                <li class="list-group-item text-white bg-black px-1"> Game
+                                                </li>
+                                            </a>
+                                            {% for gameCategory in game.getGameCategories() %}
+                                                <a href="{{ path('app_game_index',{'categoryID': gameCategory.Category.id}) }}"
+                                                   style="text-decoration: none;">
+                                                    <li class="list-group-item px-1 text-truncate text-white bg-black"> {{ gameCategory.Category.Name }}
+                                                    </li>
+                                                </a>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer row">
+                                        <a href="{{ path('app_game_show', {'id': game.id}) }}"
+                                           class="col btn btn-primary align-text-bottom ">Show</a>
+                                        <div class="col">
+                                            <button class="btn btn-warning"> Views:{{ game.Views }}</button>
 
-                    <div class=" row d-flex justify-content-center align-items-center h-100">
-                        {{ form_start(formArticle, {'attr': {class:'mx-1 mx-md-4'}}) }}
-                        <label class="text-danger bg-black w-100 border d-flex justify-content-center">
-                            CONTENT EDIT
-                        </label>
-                        {{ form_widget(formArticle.Content) }}
-                        <button type="submit" class="btn btn-primary text-danger bg-black w-100 border d-flex justify-content-center">SUBMIT</button>
-                        {{ form_end(formArticle) }}
-
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                     </div>
+                </div>
+            </div>
+        </div>
+            <!-- END: Sidebar -->
+        {% if is_granted('ROLE_ADMIN') %}
+        <div class=" row d-flex justify-content-center align-items-center h-100">
+            {{ form_start(formArticle, {'attr': {class:'mx-1 mx-md-4'}}) }}
+            <label class="text-danger bg-black w-100 border d-flex justify-content-center">
+                CONTENT EDIT
+            </label>
+            {{ form_widget(formArticle.Content) }}
+            <button type="submit"
+                    class="btn btn-primary text-danger bg-black w-100 border d-flex justify-content-center">SUBMIT
+            </button>
+            {{ form_end(formArticle) }}
+        </div>
         <div class="row">
             <div class="col">
                 {{ include('game/_delete_form.html.twig') }}
             </div>
-            <a type="button" class=" col-2 btn btn-danger" href="{{ path('app_game_edit', {'id': game.id}) }}">Edit this game</a>
+            <a type="button" class=" col-2 btn btn-danger" href="{{ path('app_game_edit', {'id': game.id}) }}">Edit this
+                game</a>
         </div>
     </div>
-{% endif %}
+    {% endif %}
     <div class="w-75 rounded border border-danger border-5 mt-5 mx-auto">
-    <h1 class= "mt-1 text-danger bg-black w-100 border border-warning d-flex justify-content-center rounded border border-danger"> Link Download</h1>
-     <div class="row mx-auto">
-         <table class="table text-danger ">
-             <tbody class="mx-auto">
-             {% for link in links %}
-             <tr>
-                 <th>{{ link.Description }}</th>
-                 <td><a href="{{ link.LinkURL }}">{{ link.LinkURL }}</a></td>
-                 <td>{{ include('link/_delete_form.html.twig') }}</td>
-             </tr>
-             {% endfor %}
-             </tbody>
-         </table>
-     </div>
+        <h1 class="mt-1 text-danger bg-black w-100 border border-warning d-flex justify-content-center rounded border border-danger">
+            Link Download</h1>
+        <div class="row mx-auto">
+            <table class="table text-danger ">
+                <tbody class="mx-auto">
+                {% for link in links %}
+                    <tr>
+                        <th>{{ link.Description }}</th>
+                        <td><a href="{{ link.LinkURL }}">{{ link.LinkURL }}</a></td>
+                        <td>{{ include('link/_delete_form.html.twig') }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% if is_granted('ROLE_ADMIN') %}
-    <label class="text-danger bg-black w-100 border d-flex justify-content-center">
-         EDIT LINK
-    </label>
-    {{ form_start(formLink) }}
-    <div class="w-75 row">
-        <div class="col-7 d-flex justify-content-end">Link Name: {{ form_widget(formLink.Description) }}</div>
-        <div class="col-5 d-flex justify-content-center ">Link URL: {{ form_widget(formLink.LinkURL) }}</div>
-    </div>
-        <button type="submit" class="btn btn-primary text-danger bg-black w-100 border d-flex justify-content-center">SUBMIT</button>
+        <label class="text-danger bg-black w-100 border d-flex justify-content-center">
+            EDIT LINK
+        </label>
+        {{ form_start(formLink) }}
+        <div class="w-75 row">
+            <div class="col-7 d-flex justify-content-end">Link Name: {{ form_widget(formLink.Description) }}</div>
+            <div class="col-5 d-flex justify-content-center ">Link URL: {{ form_widget(formLink.LinkURL) }}</div>
+        </div>
+        <button type="submit" class="btn btn-primary text-danger bg-black w-100 border d-flex justify-content-center">
+            SUBMIT
+        </button>
         {{ form_end(formLink) }}
     </div>
     {% endif %}
-
-</body>
+    </div>
+    </body>
 {% endblock %}

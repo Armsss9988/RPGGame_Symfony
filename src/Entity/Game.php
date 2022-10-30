@@ -25,12 +25,12 @@ class Game
     private $Name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $Ram;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $DiskSpace;
 
@@ -65,11 +65,22 @@ class Game
      */
     private $Views;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="recentlyGame")
+     */
+    private $user;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="recentlyGame")
+     */
+    private $users;
+
 
     public function __construct()
     {
         $this->links = new ArrayCollection();
         $this->gameCategories = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -89,24 +100,24 @@ class Game
         return $this;
     }
 
-    public function getRam(): ?int
+    public function getRam(): ?float
     {
         return $this->Ram;
     }
 
-    public function setRam(?int $Ram): self
+    public function setRam(?float $Ram): self
     {
         $this->Ram = $Ram;
 
         return $this;
     }
 
-    public function getDiskSpace(): ?int
+    public function getDiskSpace(): ?float
     {
         return $this->DiskSpace;
     }
 
-    public function setDiskSpace(?int $DiskSpace): self
+    public function setDiskSpace(?float $DiskSpace): self
     {
         $this->DiskSpace = $DiskSpace;
 
@@ -228,6 +239,45 @@ class Game
     public function setViews(?int $Views): self
     {
         $this->Views = $Views;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->addRecentlyGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeRecentlyGame($this);
+        }
 
         return $this;
     }

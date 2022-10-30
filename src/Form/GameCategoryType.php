@@ -14,6 +14,7 @@ class GameCategoryType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            //this form just set Category, Game of this entity we set after summit in controller
             ->add('Category', EntityType::class,
                 [
                     'class' => Category::class,
@@ -21,7 +22,6 @@ class GameCategoryType extends AbstractType
                 ])
         ;
     }
-
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
